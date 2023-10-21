@@ -43,8 +43,13 @@ extern "C" {
 
 #include "hagl_hal_color.h"
 
+#if defined(HAGL_HAL_DEBUG) && HAGL_HAL_DEBUG
 #define hagl_hal_debug(fmt, ...) \
-    do { if (HAGL_HAL_DEBUG) printf("[HAGL HAL] " fmt, __VA_ARGS__); } while (0)
+    do { printf("[HAGL HAL] " fmt, __VA_ARGS__); } while (0)
+#else
+#define hagl_hal_debug(fmt, ...) \
+    do { } while (0)
+#endif
 
 /* Default config is ok for Waveshare RP2040-LCD-0.96 */
 /* https://www.waveshare.com/wiki/RP2040-LCD-0.96     */
