@@ -89,6 +89,30 @@ flush(void *self)
 #endif /* HAGL_HAL_PIXEL_SIZE==2 */
 }
 
+
+static void
+set_resolution(void * self, int16_t width, int16_t height)
+{
+    hagl_backend_t * backend = (hagl_backend_t *)self;
+
+    if (backend->buffer != NULL) {
+        if ((backend->width * backend->height) != (width * height)) {
+            free(backend->buffer);
+            backend->buffer = NULL;
+        }
+    }
+
+    backend->width = width;
+    backend->height = height;
+
+    if (backend->buffer == NULL) {
+        backend->buffer = calloc(backend->width * backend->height * (HAGL_PICO_MIPI_DISPLAY_DEPTH / 8), sizeof(uint8_t));
+        hagl_hal_debug("Allocated back buffer to address %p.\n", (void *) backend->buffer);
+    }
+
+    hagl_bitmap_init(&bb, backend->width, backend->height, backend->depth, backend->buffer);
+}
+
 static void
 put_pixel(void *self, int16_t x0, int16_t y0, hagl_color_t color)
 {
@@ -138,8 +162,6 @@ hagl_hal_init(hagl_backend_t *backend)
         hagl_hal_debug("Using provided back buffer at address %p.\n", (void *) backend->buffer);
     }
 
-    backend->width = HAGL_PICO_MIPI_DISPLAY_WIDTH;
-    backend->height = HAGL_PICO_MIPI_DISPLAY_HEIGHT;
     backend->depth = HAGL_PICO_MIPI_DISPLAY_DEPTH;
     backend->put_pixel = put_pixel;
     backend->get_pixel = get_pixel;
@@ -148,8 +170,9 @@ hagl_hal_init(hagl_backend_t *backend)
     backend->blit = blit;
     backend->scale_blit = scale_blit;
     backend->flush = flush;
+    backend->set_resolution = set_resolution;
 
-    hagl_bitmap_init(&bb, backend->width, backend->height, backend->depth, backend->buffer);
+    set_resolution(backend, HAGL_PICO_MIPI_DISPLAY_WIDTH, HAGL_PICO_MIPI_DISPLAY_HEIGHT);
 }
 
 #endif /* HAGL_HAL_USE_DOUBLE_BUFFER */

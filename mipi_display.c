@@ -140,6 +140,16 @@ mipi_display_read_data(uint8_t *data, size_t length)
     };
 }
 
+static int16_t mipi_display_offset_x = MIPI_DISPLAY_OFFSET_X;
+static int16_t mipi_display_offset_y = MIPI_DISPLAY_OFFSET_Y;
+
+void
+mipi_display_set_xy_offset(int16_t new_x_offset, int16_t new_y_offset)
+{
+    mipi_display_offset_x = new_x_offset;
+    mipi_display_offset_y = new_y_offset;
+}
+
 static void
 mipi_display_set_address_xyxy(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
 {
@@ -147,10 +157,10 @@ mipi_display_set_address_xyxy(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2
     uint8_t data[4];
     static uint16_t prev_x1, prev_x2, prev_y1, prev_y2;
 
-    x1 = x1 + MIPI_DISPLAY_OFFSET_X;
-    y1 = y1 + MIPI_DISPLAY_OFFSET_Y;
-    x2 = x2 + MIPI_DISPLAY_OFFSET_X;
-    y2 = y2 + MIPI_DISPLAY_OFFSET_Y;
+    x1 = x1 + mipi_display_offset_x;
+    y1 = y1 + mipi_display_offset_y;
+    x2 = x2 + mipi_display_offset_x;
+    y2 = y2 + mipi_display_offset_y;
 
     /* Change column address only if it has changed. */
     if ((prev_x1 != x1 || prev_x2 != x2)) {
@@ -187,8 +197,8 @@ mipi_display_set_address_xy(uint16_t x1, uint16_t y1)
     uint8_t command;
     uint8_t data[2];
 
-    x1 = x1 + MIPI_DISPLAY_OFFSET_X;
-    y1 = y1 + MIPI_DISPLAY_OFFSET_Y;
+    x1 = x1 + mipi_display_offset_x;
+    y1 = y1 + mipi_display_offset_y;
 
     mipi_display_write_command(MIPI_DCS_SET_COLUMN_ADDRESS);
     data[0] = x1 >> 8;
